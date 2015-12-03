@@ -5,6 +5,8 @@
 #include <IAnimatedMeshSceneNode.h>
 #include <IEventReceiver.h>
 #include <ISceneNodeAnimatorCollisionResponse.h>
+#include <ICursorControl.h>
+#include <iostream>
 #include <vector>
 
 
@@ -38,6 +40,7 @@ private:
 	
 
 public:
+	std::string char_info;
 	EventReceiver();
 	bool OnEvent(const SEvent &event);
 	void set_node(is::IAnimatedMeshSceneNode *n);
@@ -53,6 +56,7 @@ public:
 	void movement_manager();
 	void set_ennemies(std::vector<is::IAnimatedMeshSceneNode*> e);
 	void set_textures(std::vector<iv::ITexture*> t);
+	std::string generate_char_info();
 };
 
 #endif

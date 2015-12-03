@@ -10,9 +10,6 @@ EventReceiver::EventReceiver()
 
 bool EventReceiver::OnEvent(const SEvent &event)
 {
-// Si l'événement est de type clavier (KEY_INPUT)
-// et du genre pressage de touche
-// et que la touche est escape, on sort du programme
 	switch(event.EventType)
 	{
 		case EET_KEY_INPUT_EVENT:
@@ -159,7 +156,7 @@ bool EventReceiver::mouse(const SEvent &event)
 		case EMIE_MOUSE_MOVED:
 		{
 			ic::vector3df rotation = node->getRotation();
-			rotation.Y += (event.MouseInput.X - old_x);
+			rotation.Y += (event.MouseInput.X - old_x) / 2;
 			old_x = event.MouseInput.X;
 			node->setRotation(rotation);
 			camera->setTarget(node->getPosition() + CAMERA_OFFSET);
@@ -253,6 +250,7 @@ void EventReceiver::movement_manager()
     {
       move(-2*sin(rotation.Y * M_PI / 180.0f), -2*cos(rotation.Y * M_PI / 180.0f));
     }
+    char_info = generate_char_info();
 }
 
 void EventReceiver::set_ennemies(std::vector<irr::scene::IAnimatedMeshSceneNode*> e)
@@ -265,4 +263,20 @@ void EventReceiver::set_ennemies(std::vector<irr::scene::IAnimatedMeshSceneNode*
 void EventReceiver::set_textures(std::vector<iv::ITexture*> t)
 {
   textures = t;
+}
+
+std::string EventReceiver::generate_char_info()
+{
+  ic::vector3df position = node->getPosition();
+  std::string info = "Char position : \nX " + std::to_string(position.X) + "\nY " + std::to_string(position.Y) + "\nZ " + std::to_string(position.Z);
+  for(unsigned int i = 0; i < ennemies.size(); i++)
+  {
+    is::IAnimatedMeshSceneNode *ennemy = ennemies[i];
+    if(node->getTransformedBoundingBox().intersectsWithBox(ennemy->getTransformedBoundingBox()))
+      info += "\n\nIntersection : true";
+    else
+      info += "\n\nIntersection : false";
+  }
+
+  return info;
 }

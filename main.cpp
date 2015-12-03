@@ -2,6 +2,7 @@
 #include "events.h"
 #include "collision_callback.h"
 #include <ISceneNode.h>
+#include <irrString.h>
 #include <iostream>
 
 using namespace irr;
@@ -28,11 +29,22 @@ int main()
                                         16, false, false, false, &receiver);
   device->getFileSystem()->addFileArchive("data/map-20kdm2.pk3");
 
+  ic::stringw str = "Character position : ";
+  irr::gui::IGUIEnvironment *environment = device->getGUIEnvironment();
+  irr::gui::IGUIStaticText *text = environment->addStaticText(str.c_str(),
+                                                  ic::rect<int>(20,20,320,100),
+                                                  false,
+                                                  true,
+                                                  0,
+                                                  1,
+                                                  false);
+
   iv::IVideoDriver  *driver = device->getVideoDriver();
   is::ISceneManager *smgr = device->getSceneManager();
   
   //is::IAnimatedMesh *mesh_decor = smgr->getMesh("20kdm2.bsp");
   is::IAnimatedMesh *mesh_decor = smgr->getMesh("data/plane.obj");
+  //mesh_decor->setMaterialFlag(iv::EMF_TEXTURE_WRAP,true);
   
   /*iv::SMaterial ground_material = iv::SMaterial();
   ground_material.setTexture(0,driver->getTexture("data/ground.jpg"));
@@ -45,14 +57,18 @@ int main()
   //is::IMesh *mesh_decor = smgr->getGeometryCreator()->createHillPlaneMesh(ic::dimension2d<float>(50.0f,50.0f),ic::dimension2d<unsigned int>(10,10),&ground_material,500.0f,ic::dimension2d<float>(200.0f,200.0f),ic::dimension2d<float>(100.0f,100.0f));
   is::IMeshSceneNode *node_decor;
   
+  /*iv::SMaterial ground_material = iv::SMaterial();
+  ground_material.setTexture(0,driver->getTexture("data/ground.jpg"));
+  iv::SMaterialLayer layer = ground_material.TextureLayer[0];
+  layer.TextureWrapU = iv::ETC_REPEAT;
+  layer.TextureWrapV = iv::ETC_REPEAT;
+  ground_material.TextureLayer[0] = layer;*/
+
   node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
+  node_decor->setScale(ic::vector3df(2000,700,2000));
   node_decor->setPosition(ic::vector3df(-500,-100,-500));
   node_decor->setMaterialTexture(0,driver->getTexture("data/ground.jpg"));
-  iv::SMaterial ground_material = node_decor->getMaterial(0);
-  std::cout << "ground material scale :" << ground_material.getTextureMatrix(0).getScale().X << " " << ground_material.getTextureMatrix(0).getScale().Z << std::endl;
-  ground_material.getTextureMatrix(0).setTextureScale(0.0001,0.0001);
-  std::cout << "ground material scale :" << ground_material.getTextureMatrix(0).getScale().X << " " << ground_material.getTextureMatrix(0).getScale().Z << std::endl;
-  node_decor->setScale(ic::vector3df(2000,1000,2000));
+  
   //node_decor->getMaterial(0).getTextureMatrix(0).setTextureScale(0.00001,0.00001);
   /*node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
   node_decor->setPosition(ic::vector3df(-1300,-104,-1249));
@@ -66,8 +82,6 @@ int main()
   textures.push_back(driver->getTexture("data/cyberbpain3.jpg"));
 
   receiver.set_textures(textures);
-
-  
 
   // Chargement de notre personnage (réutilisé plusieurs fois)
   is::IAnimatedMesh *mesh = smgr->getMesh("data/tris.md2");
@@ -97,7 +111,7 @@ int main()
   const ic::aabbox3d<f32>& box = perso->getBoundingBox();
         ic::vector3df radius = box.MaxEdge - box.getCenter();
 
-  /*is::ISceneNodeAnimatorCollisionResponse *anim_perso;
+  /*is::ISceneNodeAnimatorCollisionResporeceivernse *anim_perso;
   anim_perso = smgr->createCollisionResponseAnimator(selector_decor,perso,
                                                 radius,
                                                 GRAVITY,
@@ -161,15 +175,11 @@ int main()
 
     std::vector<bool> pressed_keys = receiver.get_pressed_keys();
     receiver.movement_manager();
+    str = receiver.char_info.c_str();
+    text->setText(str.c_str());
 
-    /*std::cout << camera->getPosition().X << std::endl;
-    std::cout << camera->getPosition().Y << std::endl;
-    std::cout << camera->getPosition().Z << std::endl;*/
-    // Dessin de la scène :
-    /*if(anim_perso->isFalling())
-      perso->setPosition(INITIAL_POSITION);*/
     smgr->drawAll();
-    // 
+    text->draw();
     driver->endScene();
   }
   device->drop();
