@@ -31,12 +31,33 @@ int main()
   iv::IVideoDriver  *driver = device->getVideoDriver();
   is::ISceneManager *smgr = device->getSceneManager();
   
-  is::IAnimatedMesh *mesh_decor = smgr->getMesh("20kdm2.bsp");
+  //is::IAnimatedMesh *mesh_decor = smgr->getMesh("20kdm2.bsp");
+  is::IAnimatedMesh *mesh_decor = smgr->getMesh("data/plane.obj");
+  
+  /*iv::SMaterial ground_material = iv::SMaterial();
+  ground_material.setTexture(0,driver->getTexture("data/ground.jpg"));
+  iv::SMaterialLayer layer = ground_material.TextureLayer[0];
+  layer.TextureWrapU = iv::ETC_MIRROR;
+  layer.TextureWrapV = iv::ETC_MIRROR;
+  ground_material.TextureLayer[0] = layer;
+  ground_material.getTextureMatrix(0).setTextureScale(0.0001f,0.0001f);
+  ground_material.setFlag(iv::EMF_WIREFRAME,true);*/
+  //is::IMesh *mesh_decor = smgr->getGeometryCreator()->createHillPlaneMesh(ic::dimension2d<float>(50.0f,50.0f),ic::dimension2d<unsigned int>(10,10),&ground_material,500.0f,ic::dimension2d<float>(200.0f,200.0f),ic::dimension2d<float>(100.0f,100.0f));
   is::IMeshSceneNode *node_decor;
   
   node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
+  node_decor->setPosition(ic::vector3df(-500,-100,-500));
+  node_decor->setMaterialTexture(0,driver->getTexture("data/ground.jpg"));
+  iv::SMaterial ground_material = node_decor->getMaterial(0);
+  std::cout << "ground material scale :" << ground_material.getTextureMatrix(0).getScale().X << " " << ground_material.getTextureMatrix(0).getScale().Z << std::endl;
+  ground_material.getTextureMatrix(0).setTextureScale(0.0001,0.0001);
+  std::cout << "ground material scale :" << ground_material.getTextureMatrix(0).getScale().X << " " << ground_material.getTextureMatrix(0).getScale().Z << std::endl;
+  node_decor->setScale(ic::vector3df(2000,1000,2000));
+  //node_decor->getMaterial(0).getTextureMatrix(0).setTextureScale(0.00001,0.00001);
+  /*node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
   node_decor->setPosition(ic::vector3df(-1300,-104,-1249));
-  node_decor->setName("decor");
+  node_decor->setName("decor");*/
+
 
   std::vector<iv::ITexture*> textures;
   textures.push_back(driver->getTexture("data/cyber.jpg"));
@@ -95,7 +116,7 @@ int main()
 
   is::ISceneNodeAnimatorCollisionResponse *anim_cyberdemon;
   anim_cyberdemon = smgr->createCollisionResponseAnimator(selector_decor,cyberdemon,
-                                                ic::vector3df(4.0,4.0,4.0),
+                                                ic::vector3df(10.0,4.0,10.0),
                                                 GRAVITY,
                                                 ic::vector3df(0,0,0));
   cyberdemon->addAnimator(anim_cyberdemon);
