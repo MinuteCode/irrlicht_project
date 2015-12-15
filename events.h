@@ -6,6 +6,7 @@
 #include <IEventReceiver.h>
 #include <ISceneNodeAnimatorCollisionResponse.h>
 #include <ICursorControl.h>
+#include <IGUIImage.h>
 #include <iostream>
 #include <vector>
 
@@ -25,12 +26,16 @@ private:
 	std::vector<int> hits;
 	is::ICameraSceneNode *camera;
 	is::ISceneNodeAnimatorCollisionResponse *collision;
+	is::IParticleSystemSceneNode* ps;
 
 	std::vector<iv::ITexture*> textures;
+	std::vector<ic::vector3df> locations;
 
 	int old_x, old_y;
+	int score = 0;
 	bool is_moving = false;
 	bool is_jumping = false;
+	bool game_over = false;
 	std::vector<bool> pressed_keys;
 	//Z,S,Q,D,SPACE,5 autres à déterminer
 
@@ -46,6 +51,10 @@ public:
 	void set_node(is::IAnimatedMeshSceneNode *n);
 	void set_camera(is::ICameraSceneNode *c);
 	void set_collision_response(is::ISceneNodeAnimatorCollisionResponse *c);
+	void set_particle_system(is::IParticleSystemSceneNode *particle);
+	void set_locations(std::vector<ic::vector3df> loc);
+	int get_score();
+	bool get_game_over();
 	bool jumping();
 	bool moving();
 	void move(float x, float z);

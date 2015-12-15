@@ -176,7 +176,17 @@ bool EventReceiver::mouse(const SEvent &event)
               ennemy->setMaterialTexture(0,textures[hits[i] % textures.size()]);
               ennemy->setPosition(ennemy->getPosition() + ic::vector3df(15*cos(rotation.Y * M_PI / 180.0f),0, -15*sin(rotation.Y * M_PI / 180.0f)));
               if(hits[i] % textures.size() == 0)
-                ennemy->setMD2Animation(is::EMAT_PAIN_B);
+              {
+                ps->setPosition(ennemy->getPosition());
+                ps->setVisible(true);
+                ennemy->setPosition(locations[std::rand()%8]);
+                collision->setTargetNode(ennemy);
+                score++;
+                if(score >= 3)
+                {
+                    game_over = true;
+                }
+              }
             }
         }
         break;
@@ -263,6 +273,47 @@ void EventReceiver::set_ennemies(std::vector<irr::scene::IAnimatedMeshSceneNode*
 void EventReceiver::set_textures(std::vector<iv::ITexture*> t)
 {
   textures = t;
+}
+
+void EventReceiver::set_particle_system(is::IParticleSystemSceneNode *particle)
+{
+  ps = particle;
+
+  is::IParticleEmitter* em = ps->createBoxEmitter(
+  ic::aabbox3d<f32>(-7,-10,-7,7,-10,7), // emitter size
+      ic::vector3df(0.0f,.06f,0.0f),   // initial direction
+      200,200,                             // emit rate
+      iv::SColor(0,0,200,0),       // darkest color
+      iv::SColor(0,255,0,0),       // brightest color
+      800,2000,0,                         // min and max age, angle
+      ic::dimension2df(1.f,1.f),         // min size
+      ic::dimension2df(2.f,2.f));        // max size
+  ps->setEmitter(em);
+  em->drop();
+  is::IParticleAffector* paf = ps->createFadeOutParticleAffector();
+
+  ps->addAffector(paf); // same goes for the affector
+  paf->drop();
+
+  ps->setScale(ic::vector3df(2,2,2));
+  ps->setMaterialFlag(iv::EMF_LIGHTING, false);
+  ps->setMaterialType(iv::EMT_TRANSPARENT_ADD_COLOR);
+  ps->setVisible(false);
+}
+
+void EventReceiver::set_locations(std::vector<ic::vector3df> loc)
+{
+  locations = loc;
+}
+
+int EventReceiver::get_score()
+{
+  return score;
+}
+
+bool EventReceiver::get_game_over()
+{
+  return game_over;
 }
 
 std::string EventReceiver::generate_char_info()

@@ -4,6 +4,7 @@
 #include <ISceneNode.h>
 #include <irrString.h>
 #include <iostream>
+#include <ctime>
 
 using namespace irr;
 
@@ -15,13 +16,27 @@ namespace iv = irr::video;
 #define CAMERA_OFFSET ic::vector3df(0,20,0)
 #define INITIAL_POSITION ic::vector3df(0,0,0)
 
+
 is::ICameraSceneNode *camera;
 
 int main()
 {
+  std::srand(std::time(0));
+  std::vector<ic::vector3df> cyberdemons_location = {
+  ic::vector3df(649.5,-14,103),
+  ic::vector3df(276,114,374.5),
+  ic::vector3df(-400.5,114,491.5),
+  ic::vector3df(-409,114,-243),
+  ic::vector3df(-403,114,468),
+  ic::vector3df(625,242,1065),
+  ic::vector3df(115,338,662),
+  ic::vector3df(-405,274,-762.5)
+  };
+
   // Le gestionnaire d'événements
   EventReceiver receiver;
   receiver.initialize_pressed_keys();
+  receiver.set_locations(cyberdemons_location);
 
   // Création de la fenêtre et du système de rendu.
   IrrlichtDevice *device = createDevice(iv::EDT_OPENGL,
@@ -31,48 +46,44 @@ int main()
 
   ic::stringw str = "Character position : ";
   irr::gui::IGUIEnvironment *environment = device->getGUIEnvironment();
-  irr::gui::IGUIStaticText *text = environment->addStaticText(str.c_str(),
+  /*irr::gui::IGUIStaticText *text = environment->addStaticText(str.c_str(),
                                                   ic::rect<int>(20,20,320,100),
                                                   false,
                                                   true,
                                                   0,
                                                   1,
                                                   false);
+  text->setOverrideColor(iv::SColor(255,255,255,255));*/
 
-  iv::IVideoDriver  *driver = device->getVideoDriver();
+  irr::gui::IGUIImage *score_10 = environment->addImage(ic::rect<s32>(10,10,50,50)); score_10->setScaleImage(true);
+  irr::gui::IGUIImage *score_1 = environment->addImage(ic::rect<s32>(50,10,90,50)); score_1->setScaleImage(true);
+  iv::ITexture *digits[10];
+  
+
+  iv::IVideoDriver *driver = device->getVideoDriver();
+  digits[0] = driver->getTexture("data/0.png");
+  digits[1] = driver->getTexture("data/1.png");
+  digits[2] = driver->getTexture("data/2.png");
+  digits[3] = driver->getTexture("data/3.png");
+  digits[4] = driver->getTexture("data/4.png");
+  digits[5] = driver->getTexture("data/5.png");
+  digits[6] = driver->getTexture("data/6.png");
+  digits[7] = driver->getTexture("data/7.png");
+  digits[8] = driver->getTexture("data/8.png");
+  digits[9] = driver->getTexture("data/9.png");
+
   is::ISceneManager *smgr = device->getSceneManager();
-  
-  //is::IAnimatedMesh *mesh_decor = smgr->getMesh("20kdm2.bsp");
-  is::IAnimatedMesh *mesh_decor = smgr->getMesh("data/plane.obj");
-  //mesh_decor->setMaterialFlag(iv::EMF_TEXTURE_WRAP,true);
-  
-  /*iv::SMaterial ground_material = iv::SMaterial();
-  ground_material.setTexture(0,driver->getTexture("data/ground.jpg"));
-  iv::SMaterialLayer layer = ground_material.TextureLayer[0];
-  layer.TextureWrapU = iv::ETC_MIRROR;
-  layer.TextureWrapV = iv::ETC_MIRROR;
-  ground_material.TextureLayer[0] = layer;
-  ground_material.getTextureMatrix(0).setTextureScale(0.0001f,0.0001f);
-  ground_material.setFlag(iv::EMF_WIREFRAME,true);*/
-  //is::IMesh *mesh_decor = smgr->getGeometryCreator()->createHillPlaneMesh(ic::dimension2d<float>(50.0f,50.0f),ic::dimension2d<unsigned int>(10,10),&ground_material,500.0f,ic::dimension2d<float>(200.0f,200.0f),ic::dimension2d<float>(100.0f,100.0f));
-  is::IMeshSceneNode *node_decor;
-  
-  /*iv::SMaterial ground_material = iv::SMaterial();
-  ground_material.setTexture(0,driver->getTexture("data/ground.jpg"));
-  iv::SMaterialLayer layer = ground_material.TextureLayer[0];
-  layer.TextureWrapU = iv::ETC_REPEAT;
-  layer.TextureWrapV = iv::ETC_REPEAT;
-  ground_material.TextureLayer[0] = layer;*/
 
-  node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
-  node_decor->setScale(ic::vector3df(2000,700,2000));
-  node_decor->setPosition(ic::vector3df(-500,-100,-500));
-  node_decor->setMaterialTexture(0,driver->getTexture("data/ground.jpg"));
+  is::IParticleSystemSceneNode* ps = smgr->addParticleSystemSceneNode(false);
+  receiver.set_particle_system(ps);
   
-  //node_decor->getMaterial(0).getTextureMatrix(0).setTextureScale(0.00001,0.00001);
-  /*node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
+  is::IAnimatedMesh *mesh_decor = smgr->getMesh("20kdm2.bsp");
+  mesh_decor->setMaterialFlag(iv::EMF_LIGHTING,false);
+
+  is::IMeshSceneNode *node_decor;
+  node_decor = smgr->addOctreeSceneNode(mesh_decor->getMesh(0),nullptr,-1,1024);
   node_decor->setPosition(ic::vector3df(-1300,-104,-1249));
-  node_decor->setName("decor");*/
+  node_decor->setName("decor");
 
 
   std::vector<iv::ITexture*> textures;
@@ -83,12 +94,12 @@ int main()
 
   receiver.set_textures(textures);
 
-  // Chargement de notre personnage (réutilisé plusieurs fois)
+  // Chargement de notre personnage (réutilisé plusieurs fois)StaticText
   is::IAnimatedMesh *mesh = smgr->getMesh("data/tris.md2");
   is::IAnimatedMesh *cyberdemon_mesh = smgr->getMesh("data/Cyber.md2");
 
   // Attachement de notre personnage dans la scène
-  is::IAnimatedMeshSceneNode *perso = smgr->addAnimatedMeshSceneNode(mesh);
+  is::IAnimatedMeshSceneNode* perso = smgr->addAnimatedMeshSceneNode(mesh);
   receiver.set_node(perso);
   perso->setMaterialFlag(iv::EMF_LIGHTING, false);
   perso->setMD2Animation(is::EMAT_STAND);
@@ -119,22 +130,50 @@ int main()
   
   //receiver.set_collision_response(anim_perso);
 
-  is::IAnimatedMeshSceneNode *cyberdemon = smgr->addAnimatedMeshSceneNode(cyberdemon_mesh);
+  
+  std::vector<is::IAnimatedMeshSceneNode*> ennemies;
+
+  std::vector<is::IAnimatedMesh> cyberdemon_vector;
+
+  is::ISceneNodeAnimatorCollisionResponse *anim_cyberdemon;
+
+  is::IAnimatedMeshSceneNode *cyberdemon;
+  is::ITriangleSelector *selector_cyberdemon;
+  for(int i = 0; i < 4; i++){
+    cyberdemon = smgr->addAnimatedMeshSceneNode(cyberdemon_mesh);
+    cyberdemon->setScale(ic::vector3df(0.25,0.25,0.25));
+    cyberdemon->setMaterialFlag(iv::EMF_LIGHTING, false);
+    cyberdemon->setMD2Animation(is::EMAT_STAND);
+    cyberdemon->setMaterialTexture(0, textures[0]);
+    cyberdemon->setPosition(cyberdemons_location[std::rand()%8]);
+    cyberdemon->setDebugDataVisible(is::EDS_BBOX);
+    
+    anim_cyberdemon = smgr->createCollisionResponseAnimator(selector_decor,cyberdemon,
+                                                ic::vector3df(10.0,4.0,10.0),
+                                                GRAVITY,
+                                                ic::vector3df(0,0,0));
+    cyberdemon->addAnimator(anim_cyberdemon);
+
+    selector_cyberdemon = smgr->createTriangleSelector(cyberdemon->getMesh(), cyberdemon);
+    cyberdemon->setTriangleSelector(selector_cyberdemon);
+    meta_selector->addTriangleSelector(selector_cyberdemon);
+    ennemies.push_back(cyberdemon);
+
+  }
+  receiver.set_ennemies(ennemies);
+
+  /*is::IAnimatedMeshSceneNode *cyberdemon = smgr->addAnimatedMeshSceneNode(cyberdemon_mesh);
   cyberdemon->setScale(ic::vector3df(0.25,0.25,0.25));
   cyberdemon->setMaterialFlag(iv::EMF_LIGHTING, false);
   cyberdemon->setMD2Animation(is::EMAT_STAND);
   cyberdemon->setMaterialTexture(0, textures[0]);
-  cyberdemon->setPosition(INITIAL_POSITION + ic::vector3df(50,0,50));
+  cyberdemon->setPosition(INITIAL_POSITION + ic::vector3df(50,0,50)ic::vector3df(649,-14,103));
   cyberdemon->setDebugDataVisible(is::EDS_BBOX);
   cyberdemon->setName("cyberdemon");
 
-  is::ISceneNodeAnimatorCollisionResponse *anim_cyberdemon;
-  anim_cyberdemon = smgr->createCollisionResponseAnimator(selector_decor,cyberdemon,
-                                                ic::vector3df(10.0,4.0,10.0),
-                                                GRAVITY,
-                                                ic::vector3df(0,0,0));
+  
   cyberdemon->addAnimator(anim_cyberdemon);
-  std::vector<is::IAnimatedMeshSceneNode*> ennemies;
+  
   ennemies.push_back(cyberdemon);
   receiver.set_ennemies(ennemies);
 
@@ -142,7 +181,7 @@ int main()
 
   is::ITriangleSelector *selector_cyberdemon = smgr->createTriangleSelector(cyberdemon->getMesh(),cyberdemon);
   cyberdemon->setTriangleSelector(selector_cyberdemon);
-  meta_selector->addTriangleSelector(selector_cyberdemon);
+  meta_selector->addTriangleSelector(selector_cyberdemon);*/
 
   is::ISceneNodeAnimatorCollisionResponse *anim_collision;
   anim_collision = smgr->createCollisionResponseAnimator(meta_selector,perso,
@@ -176,10 +215,20 @@ int main()
     std::vector<bool> pressed_keys = receiver.get_pressed_keys();
     receiver.movement_manager();
     str = receiver.char_info.c_str();
-    text->setText(str.c_str());
+    //text->setText(str.c_str());
+
+    score_10->setImage(digits[(receiver.get_score()/10) % 10]);
+    score_1->setImage(digits[(receiver.get_score()/1) % 10]);
 
     smgr->drawAll();
-    text->draw();
+    //text->draw();
+    if(receiver.get_game_over())
+    {
+      irr::gui::IGUIImage *win = environment->addImage(ic::rect<s32>(1024/2-200,768/2-50,1024/2+200,768/2+50)); win->setScaleImage(true);
+      win->setUseAlphaChannel(true);
+      win->setImage(driver->getTexture("data/you_win.png"));
+    }
+    environment->drawAll();
     driver->endScene();
   }
   device->drop();
